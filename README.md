@@ -1,46 +1,35 @@
-# AirChain-X
+# Delta VCS - A Simple Version Control System
 
-![AirChain-X](./assets/images/display.png)
+![Delta VCS Logo](path/to/logo.png)  <!-- Replace with the actual path to your logo image -->
 
-## Overview
+## Description
+Delta VCS is a lightweight version control system built in C, designed to manage file versions in a simplified way. Inspired by Git, Delta VCS enables you to track file changes, commit snapshots, and revert to previous versions, making it perfect for small projects or educational purposes.
 
-**AirChain-X** is an innovative project designed to revolutionize the way airports communicate by leveraging decentralized networks. By enabling airports to interact directly through a peer-to-peer blockchain, AirChain-X ensures secure, transparent, and efficient management of crucial on ground flight parameters.
+## Features
+- **Initialize Repository**: Set up a new repository with essential directories.
+- **Stage Files**: Add files to a staging area before committing.
+- **Commit Changes**: Save snapshots of your project’s state.
+- **Revert to Previous Commits**: Roll back to any previous commit.
+- **SHA-1 Hashing**: Files are stored using SHA-1 hashes for integrity.
 
-## Getting Started
+## Installation
 
-### Prerequisites
-
-- C
-- OpenGL
-- Docker
-
-### Installation
-
-1. Clone the repository:
+1. **Clone the Repository**
    ```bash
-   git clone https://github.com/your-repo/AirChain-X.git
-   ```
-2. Run the application:
-   ```bash
-   cd AirChain-X
-   ./main.exe
-   ```
+   git clone https://github.com/yourusername/delta-vcs.git
+   cd delta-vcs
+Compile the Source Code Use a C compiler (like gcc) to compile the code:
 
-## Contributing
 
-We welcome contributions! Please read our [Contributing Guidelines](./CONTRIBUTING.md) for details on how to contribute to this project.
+## Contributions 
+Feel free to fork the repository, make improvements, and submit a pull request. For major changes, please open an issue to discuss the changes you propose.
 
 ## License
+This project is licensed under the MIT License. See the LICENSE file for more details.
 
-This project is licensed under the GPL License - see the [LICENSE](./LICENSE) file for details.
+## Acknowledgments
+Git: Inspiration for Delta VCS functionality.
+SHA-1: Secure Hash Algorithm for file integrity.
 
----
-
-*“Redefining the Future of Air Travel with Decentralized Technology.”*
-
-```
-
-### Notes:
-- Replace `"./path-to-your-image.png"` with the actual path to your image in the project directory.
-- Update the `git clone` URL with the correct repository link.
-- Add any additional sections or details relevant to your project.
+## Authors
+Made by Aman Morghade and Ananya Madane
