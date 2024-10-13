@@ -5,12 +5,12 @@
 
 // Blob represents file contents in the VCS
 typedef struct Blob {
-    char hash[41];            // SHA-1 hash of the file content
+    char hash[41];            // SHA-1 hash
     char filename[100];        // Filename
     struct Blob* next;         // Pointer to the next blob
 } Blob;
 
-// Tree represents a directory structure in the VCS
+// Tree represents a directory structure
 typedef struct Tree {
     char hash[41];             // SHA-1 hash of the tree
     Blob* blobs;               // List of blobs (files) in this directory
@@ -19,15 +19,15 @@ typedef struct Tree {
 
 // Commit represents a snapshot of the file system in the VCS
 typedef struct Commit {
-    char hash[41];             // SHA-1 hash of the commit
+    char hash[41];             // SHA-1 hash
     char message[256];         // Commit message
     struct tm timestamp;       // Commit timestamp
     Tree* tree;                // Pointer to the tree snapshot
     struct Commit* parent;     // Pointer to the parent commit
-    struct Commit* secondParent;  // Pointer to second parent (for merges)
+    struct Commit* secondParent;  // Pointer to second parent (for Merges)
 } Commit;
 
-// Function declarations for SHA-1 hashing and object management
+// Initial Prototypes
 Tree* createTree(Blob* blobs);
 Commit* createCommit(const char* message, Tree* tree, Commit* parent);
 void storeBlob(Blob* blob);
