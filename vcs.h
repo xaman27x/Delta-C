@@ -3,37 +3,40 @@
 
 #include <time.h>
 
-// Blob represents file contents in the VCS
+typedef char Hash[41];  
+
 typedef struct Blob {
-    char hash[41];            // SHA-1 hash
-    char filename[100];        // Filename
-    struct Blob* next;         // Pointer to the next blob
+    Hash hash;  // SHA-1 hash of the file content
+    char filename[100]; // Filename
+    struct Blob* next; // Pointer to the next blob (for linked list)
 } Blob;
 
-// Tree represents a directory structure
 typedef struct Tree {
-    char hash[41];             // SHA-1 hash of the tree
-    Blob* blobs;               // List of blobs (files) in this directory
-    struct Tree* subtrees;     // List of subtrees (directories)
+    Hash hash;   // SHA-1 hash of the directory structure
+    Blob* blobs; // List of blobs (files) in this directory
+    struct Tree* subtrees; // List of subtrees (subdirectories)
+    struct Tree* next; // Pointer to next directory in the list
 } Tree;
 
-// Commit represents a snapshot of the file system in the VCS
 typedef struct Commit {
-    char hash[41];             // SHA-1 hash
-    char message[256];         // Commit message
-    struct tm timestamp;       // Commit timestamp
-    Tree* tree;                // Pointer to the tree snapshot
-    struct Commit* parent;     // Pointer to the parent commit
-    struct Commit* secondParent;  // Pointer to second parent (for Merges)
+    Hash hash; // Hash of the commit
+    char message[256]; // Commit message
+    struct tm timestamp; // Commit timestamp
+    Tree* tree; // Pointer to the root tree snapshot
+    struct Commit* parent; // Pointer to the parent commit
+    struct Commit* secondParent; // Pointer to second parent (for merges)
 } Commit;
 
-// Initial Prototypes
-Tree* createTree(Blob* blobs);
-Commit* createCommit(const char* message, Tree* tree, Commit* parent);
-void storeBlob(Blob* blob);
-void storeTree(Tree* tree);
-void storeCommit(Commit* commit);
-Blob* createBlob(const char* filename);
+Tree* createTree(Blob* blobs);                     // Initialize a new tree 
+Commit* createCommit(const char* message, Tree* tree, Commit* parent);  // Create a new commit
+Blob* createBlob(const char* filename);            // Create a blob 
 
+// Function declarations for storing and hashing
+void storeBlob(Blob* blob);                        // Store blob in .git
+void storeTree(Tree* tree);                        // Store tree in .git
+void storeCommit(Commit* commit);                  // Store commit in .git
 
+void freeBlob(Blob* blob);
+void freeTree(Tree* tree);
+void freeCommit(Commit* commit); 
 #endif
