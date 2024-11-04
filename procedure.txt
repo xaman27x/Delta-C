@@ -1,0 +1,17 @@
+> Blob and Commit Structures:
+- Blob Structure: Hash, Timestamp of Creation and the Contents of the file
+-- Functions involved in Blob Structure: File Parsing, Hashing and Blob Creation
+
+- Commit Structure: Snapshot of Latest Directory Structure (Tree), Timestamp, Commit Message, Linked List of Commits and additional branching for merges
+-- Functions involved in Commit Structure: Add Tree to Commit, Linking of Commits and branching
+
+> Add:
+- Implement Add Functionality to Stage Files for Commit
+- Store Blob's Hash and Timestamp in .git directory. The function should add files by storing their hashes and paths
+
+> Commit:
+- Implement Commit Functionality which takes staged files and creates a commit
+- Store the Commit Tree, Hash, Timestamp and Message in ,git Directory
+- Maintain links between parent and current commit to form chain of commit histories
+
+Note: We can use .delta/index directory to stage/add files temporarily and .delta/objects file contains the commit history.
