@@ -15,3 +15,7 @@
 - Maintain links between parent and current commit to form chain of commit histories
 
 Note: We can use .delta/index directory to stage/add files temporarily and .delta/objects file contains the commit history.
+
+> Log:
+- Implement Log Functionality which takes the history of commits and displays it to the user on the terminal window
+- Order: Timestamp of Commits
