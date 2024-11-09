@@ -52,7 +52,7 @@ Blob* createBlob(const char* filename) {
 
     size_t bytesRead = fread(content, 1, sizeof(content), file);
     content[bytesRead] = '\0';
-    newBlob->fileContents = content;
+    strcpy(newBlob->fileContents, content);
     calculateSHA1(content, newBlob->hash); 
 
     fclose(file);
