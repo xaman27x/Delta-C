@@ -5,6 +5,6 @@
 
 // Function to stage a file for commit
 Blob* stageFile(const char* filename);
-void storeBlob(Blob* blob);
+void storeBlobObject(Blob* blob);
 
 #endif

@@ -20,24 +20,26 @@ Blob* stageFile(const char* filename) {
 }
 
 // Stores the blob
-void storeBlob(Blob* blob) {
-    char path[256];
-    snprintf(path, sizeof(path), ".delta/objects/%s", blob->hash);
-    FILE* blobFile = fopen(path, "w");
+void storeBlobObject(Blob* blob) {
 
-    if (!blobFile) {
-        printf("Error: Unable to store blob %s\n", blob->filename);
-        return;
+    char object_subdir[128];
+    char object_filepath[256];
+  
+    snprintf(object_subdir, sizeof(object_subdir), ".git/objects/%.2s", blob->hash);
+    snprintf(object_filepath, sizeof(object_filepath), ".git/objects/%.2s/%s", blob->hash, blob->hash + 2);
+    mkdir("object_subdir");
+    FILE *blob_file = fopen(filepath, "w");
+    if (blob_file) {
+        fwrite(blob->fileContents, 1, sizeof(blob->fileContents), blob_file);
+        fclose(blob_file);
     }
-
-    fprintf(blobFile, "%s\n", blob->filename); 
-    fclose(blobFile);
 }
 
 // Function to create a blob
 Blob* createBlob(const char* filename) {
     Blob* newBlob = (Blob*)malloc(sizeof(Blob));
     strcpy(newBlob->filename, filename);
+    newBlob->next = NULL;
 
     // Read the file content and calculate its hash
     char content[1024];
@@ -50,6 +52,7 @@ Blob* createBlob(const char* filename) {
 
     size_t bytesRead = fread(content, 1, sizeof(content), file);
     content[bytesRead] = '\0';
+    newBlob->fileContents = content;
     calculateSHA1(content, newBlob->hash); 
 
     fclose(file);

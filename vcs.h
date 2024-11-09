@@ -8,7 +8,7 @@ typedef char Hash[41];
 typedef struct Blob {
     Hash hash;  // SHA-1 hash of the file content
     char filename[100]; // Filename
-    char* fileContents;
+    char* fileContents; //File Contents
     struct Blob* next; // Pointer to the next blob (for linked list)
 } Blob;
 
