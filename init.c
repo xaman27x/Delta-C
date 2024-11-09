@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include "init.h"
 #include "vcs.h"
 
 // Initialize the repository by creating necessary directories

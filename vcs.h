@@ -1,7 +1,9 @@
 #ifndef VCS_H
 #define VCS_H
 
+#include <stdint.h>
 #include <time.h>
+#define SHA1_BLOCK_SIZE 20 
 
 typedef char Hash[41];  
 
@@ -27,16 +29,16 @@ typedef struct Commit {
     struct Commit* secondParent; // Pointer to second parent (for merges)
 } Commit;
 
-Tree* createTree(Blob* blobs);                     // Initialize a new tree 
-Commit* createCommit(const char* message, Tree* tree, Commit* parent);  // Create a new commit
-Blob* createBlob(const char* filename);            // Create a blob 
-
 // Function declarations for storing and hashing
-void storeBlob(Blob* blob);                        // Store blob in .git
-void storeTree(Tree* tree);                        // Store tree in .git
-void storeCommit(Commit* commit);                  // Store commit in .git
+void initRepository();                            // Initialize the repository
 
+void calculateSHA1(const char* input, char output[41]);
+
+
+void add(const char* path);                      // Add file to staging area
+void storeBlob(Blob* blob);                      // Store blob in .delta/objects
+int hashFile(const char* filename, char hash[41]); // Get hash of file
+void addToStagingArea(const char* filename, const char hash[41]);  // Add file to index
+Blob* createBlob(const char* filename);  // Create a blob from file
 void freeBlob(Blob* blob);
-void freeTree(Tree* tree);
-void freeCommit(Commit* commit); 
 #endif
