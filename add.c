@@ -30,7 +30,7 @@ int hashFile(const char* filename, char hash[41]) {
     fileContent[fileSize] = '\0';
     fclose(file);
 
-    calculateSHA1(fileContent, hash);
+    calculateSHA(fileContent, hash);
     free(fileContent);
 
     return 0;

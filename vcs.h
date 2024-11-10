@@ -3,7 +3,6 @@
 
 #include <stdint.h>
 #include <time.h>
-#define SHA1_BLOCK_SIZE 20 
 
 typedef char Hash[41];  
 
@@ -15,6 +14,7 @@ typedef struct Blob {
 
 typedef struct Tree {
     Hash hash;   // SHA-1 hash of the directory structure
+    char path[256]; // Path of the directory (used for subtree identification)
     Blob* blobs; // List of blobs (files) in this directory
     struct Tree* subtrees; // List of subtrees (subdirectories)
     struct Tree* next; // Pointer to next directory in the list
@@ -31,14 +31,20 @@ typedef struct Commit {
 
 // Function declarations for storing and hashing
 void initRepository();                            // Initialize the repository
-
-void calculateSHA1(const char* input, char output[41]);
-
-
+void calculateSHA(const char* input, char output[41]); // Hash calculation
 void add(const char* path);                      // Add file to staging area
 void storeBlob(Blob* blob);                      // Store blob in .delta/objects
 int hashFile(const char* filename, char hash[41]); // Get hash of file
 void addToStagingArea(const char* filename, const char hash[41]);  // Add file to index
 Blob* createBlob(const char* filename);  // Create a blob from file
-void freeBlob(Blob* blob);
+void freeBlob(Blob* blob);  // Free memory used by a blob
+
+// Commit functions and helpers
+void saveToFile(const char* path, const char* content);
+Tree* findOrCreateSubtree(Tree* root, const char* path);  // Find or create a subtree in the tree
+void addBlobToTree(Tree* tree, const char* hash, const char* filename);  // Add blob to the tree
+Tree* buildTreeFromIndex();  // Build tree based on the index file (staging area)
+Commit* createCommit(Tree* rootTree, Commit* parentCommit, const char* message);  // Create commit object
+void commit(const char* message, Commit* parentCommit);  // Commit changes
+
 #endif
