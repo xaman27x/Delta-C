@@ -36,7 +36,6 @@ int hashFile(const char* filename, char hash[41]) {
     return 0;
 }
 
-// Append filename and hash to `.delta/index`
 void addToStagingArea(const char* filename, const char hash[41]) {
     FILE* indexFile = fopen(INDEX_PATH, "a");
     if (!indexFile) {
@@ -44,11 +43,11 @@ void addToStagingArea(const char* filename, const char hash[41]) {
         return;
     }
 
-    fprintf(indexFile, "%s %s\n", hash, filename);  // Append hash and filename
+    fprintf(indexFile, "%s %s\n", hash, filename);
     fclose(indexFile);
 }
 
-// Store the file content as a blob in .delta/objects using the hash as the filename
+// Store the file content as a blob in .delta/objects
 void storeBlob(Blob* blob) {
     char path[60];
     snprintf(path, sizeof(path), ".delta/objects/%s", blob->hash);
@@ -59,13 +58,12 @@ void storeBlob(Blob* blob) {
 
     FILE* file = fopen(blob->filename, "rb");
     if (!file) {
-        perror("Failed to open source file for blob storage");
+        perror("Failed to open source file");
         return;
     }
 
     FILE* blobFile = fopen(path, "wb");
     if (!blobFile) {
-        perror("Failed to open blob file for writing");
         fclose(file);
         return;
     }
@@ -92,9 +90,8 @@ void add(const char* path) {
 
         struct dirent* entry;
         while ((entry = readdir(dir)) != NULL) {
-            // Skip directories and hidden files
             if (entry->d_type == DT_REG && entry->d_name[0] != '.') {
-                add(entry->d_name);  // Recursive call to add each individual file
+                add(entry->d_name);  // Recursive call
             }
         }
         closedir(dir);
