@@ -7,11 +7,11 @@
 #include <time.h>
 #include "vcs.h"
 
-void initTree(Tree* tree) {
-    tree = malloc(sizeof(Tree));
-    tree->blobs = NULL;
-    tree->subtrees = NULL;
-    tree->next = NULL;
+void initTree(Tree** tree) {
+    *tree = (*Tree)malloc(sizeof(Tree));
+    *tree->blobs = NULL;
+    *tree->subtrees = NULL;
+    *tree->next = NULL;
 }
 
 Tree* createCommitTree(char* dirpath) {     //creates tree representing current directory structure using blobs identified by hashes
@@ -42,30 +42,27 @@ Tree* createCommitTree(char* dirpath) {     //creates tree representing current 
         }
         else if (S_ISREG(file_stat.st_mode)) {
             Blob* newBlob = createBlob(filename);
-            hashFile(filename, newBlob->hash);
-            new_blob->next = tree->blobs;
+            hashFile(entry->d_name, newBlob->hash);
+            newBlob->next = tree->blobs;
             tree->blobs = new_blob;
         }
     }
 
     hashTree(&tree, tree->hash);
-    close(dir);
+    closedir(dir);
     return tree;
 
 }
 
-void createCommit(Hash commitHash, char commitMessage[], Tree* tree, time_t timestamp) { //creates and initialises commit object
-    Commit* commit = (*commit)malloc(sizeof(Commit));
-    strcpy(commit->hash, commitHash);
+void createCommit(char commitMessage[], Tree* tree, time_t timestamp) { //creates and initialises commit object
+    Commit* commit = (*Commit)malloc(sizeof(Commit));
     strcpy(commit->message, commitMessage);
-    commit->tree = &tree;
+    commit->tree = tree;
     commit->timestamp = timestamp;
     commit->parent = NULL;
     commit->secondParent = NULL;
 }
 
-
-typedef Commit* commitList;
 
 void initCommitList(commitList* commits) {
     *commits = NULL;
@@ -93,7 +90,7 @@ void storeCommit(Commit* commit) {      //to store commit in objects/commits fol
 
     FILE* commitFile = fopen(path, "wb");
     if (!commitFile) {
-        fclose(file);
+        fclose(commitFile);
         return;
     }
 
@@ -113,7 +110,7 @@ void storeCommit(Commit* commit) {      //to store commit in objects/commits fol
 
 }
 
-storeCommitTreeFile(Tree* tree) {       //to store tree in objects/tree folder
+void storeCommitTreeFile(Tree* tree) {       //to store tree in objects/tree folder
    
     char path[60];
     snprintf(path, sizeof(path), ".delta/objects/trees/%s", tree->hash);
@@ -132,34 +129,35 @@ storeCommitTreeFile(Tree* tree) {       //to store tree in objects/tree folder
     while(curr_blob) {
         fwrite(curr_blob->filename, 1,strlen(curr_blob->filename) , treeFile);
         fwrite(curr_blob->hash, 1,strlen(curr_blob->hash) , treeFile);
+        curr_blob = curr_blob->next;
     }
 
     Tree* curr_subtree = tree->subtrees;
     while(curr_subtree) {
         storeCommitTreeFile(curr_subtree);
         fwrite(curr_subtree->hash, 1,strlen(curr_subtree->hash) , treeFile);
+        curr_subtree = curr_subtree->next;
     }
 
     fclose(treeFile);
 }
 
 
-void commit() {
-    Hash commitHash;
-    char commitMessage[];
+void commit(char commitMessage[256]) {
     time_t timestamp = time(NULL);
 
     Tree* tree;
     initTree(&tree)
     tree = createCommitTree(".");
 
-    Commit* commit = createCommit(Hash commitHash, char commitMessage[], &tree, timestamp);
+    Commit* commit = createCommit(commitMessage[256], tree, timestamp);
+    hashCommit(commit, commit->hash);
 
     commitList* commitList;
-    initCommitList(&commitList);
-    appendCommitList(commit);
+    initCommitList(commitList);
+    appendCommitList(commitList, commit);
 
-    storeCommit(&commit);
-    
-    storeCommitTreeFile(&tree); 
+    storeCommit(commit);
+
+    storeCommitTreeFile(tree); 
 }

@@ -41,4 +41,16 @@ int hashFile(const char* filename, char hash[41]); // Get hash of file
 void addToStagingArea(const char* filename, const char hash[41]);  // Add file to index
 Blob* createBlob(const char* filename);  // Create a blob from file
 void freeBlob(Blob* blob);
+
+void initTree(Tree** tree);
+Tree* createCommitTree(char* dirpath);
+void createCommit(Hash commitHash, char commitMessage[], Tree* tree, time_t timestamp);
+typedef Commit* commitList;
+void initCommitList(commitList* commits);
+void appendCommitList(commitList* commits, Commit* commit);
+void storeCommit(Commit* commit);
+void storeCommitTreeFile(Tree* tree);
+void commit(char commitMessage[256]);
+
+
 #endif
