@@ -143,7 +143,7 @@ void storeCommitTreeFile(Tree* tree) {       //to store tree in objects/tree fol
 }
 
 
-void commit(char commitMessage[256]) {
+void commit(char commitMessage[256],  commitList* commitList) {
     time_t timestamp = time(NULL);
 
     Tree* tree;
@@ -153,8 +153,6 @@ void commit(char commitMessage[256]) {
     Commit* commit = createCommit(commitMessage[256], tree, timestamp);
     hashCommit(commit, commit->hash);
 
-    commitList* commitList;
-    initCommitList(commitList);
     appendCommitList(commitList, commit);
 
     storeCommit(commit);
