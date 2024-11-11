@@ -44,7 +44,7 @@ Tree* createCommitTree(char* dirpath) {     //creates tree representing current 
             Blob* newBlob = createBlob(filename);
             hashFile(entry->d_name, newBlob->hash);
             newBlob->next = tree->blobs;
-            tree->blobs = new_blob;
+            tree->blobs = newBlob;
         }
     }
 
