@@ -3,18 +3,29 @@
 #include <unistd.h>
 #include "vcs.h"
 
-// Initialize the repository by creating necessary directories
 void initRepository() {
     if (mkdir(".delta") == 0) {
-        mkdir(".delta/objects");  // Store blobs and trees
-        mkdir(".delta/refs");     // Store branch references
+        mkdir(".delta/objects/trees");      // Store blobs and trees
+        mkdir(".delta/objects/blobs");        // Store tree objects
+        mkdir(".delta/objects/commits");      // Store commit objects
+        mkdir(".delta/refs");         // Store branch references
+        mkdir(".delta/refs/heads");   // Store individual branches
+        
         FILE* headFile = fopen(".delta/HEAD", "w");
-        fprintf(headFile, "ref: refs/heads/master\n");  // Initialize HEAD to master branch
-        fclose(headFile);
+        if (headFile) {
+            fprintf(headFile, "ref: refs/heads/master\n");
+            fclose(headFile);
+        } else {
+            perror("Failed to initialize HEAD file");
+        }
+        FILE* indexFile = fopen(".delta/index", "w");
+        if (indexFile) {
+            fclose(indexFile);
+        };
         printf("Repository initialized.\n");
     } else if (access(".delta", F_OK) == 0) {
         printf("Repository already exists.\n");
     } else {
-        printf("Failed to initialize repository.\n");
+        perror("Failed to initialize repository");
     }
 }

@@ -30,7 +30,7 @@ int hashFile(const char* filename, char hash[41]) {
     fileContent[fileSize] = '\0';
     fclose(file);
 
-    calculateSHA1(fileContent, hash);
+    calculateSHA(fileContent, hash);
     free(fileContent);
 
     return 0;
@@ -50,7 +50,7 @@ void addToStagingArea(const char* filename, const char hash[41]) {
 // Store the file content as a blob in .delta/objects
 void storeBlob(Blob* blob) {
     char path[60];
-    snprintf(path, sizeof(path), ".delta/objects/%s", blob->hash);
+    snprintf(path, sizeof(path), ".delta/objects/blobs/%s", blob->hash);
 
     if (access(path, F_OK) == 0) {
         return; // Blob already exists

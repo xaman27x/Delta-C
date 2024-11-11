@@ -1,6 +1,7 @@
 #include "vcs.h"
 #include <string.h>
 #include <stdio.h>
+#define SHA_BLOCK_SIZE 20 
 
 typedef struct {
     uint32_t state[5];
