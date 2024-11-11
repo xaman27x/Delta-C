@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #include <time.h>
-
+#define COMMIT_MSG_SIZE 256
 typedef char Hash[41];  
 
 typedef struct Blob {
@@ -38,5 +38,16 @@ int hashFile(const char* filename, char hash[41]); // Get hash of file
 void addToStagingArea(const char* filename, const char hash[41]);  // Add file to index
 Blob* createBlob(const char* filename);  // Create a blob from file
 void freeBlob(Blob* blob);  // Free memory used by a blob
+
+// Functions for commit and tree management
+void initTree(Tree** tree);  // Initialize tree
+Tree* createCommitTree(char* dirpath);  // Create commit tree from directory
+void createCommit(Hash commitHash, char commitMessage[], Tree* tree, time_t timestamp);  // Create a commit
+typedef Commit* commitList;  // Commit list type
+void initCommitList(commitList* commits);  // Initialize commit list
+void appendCommitList(commitList* commits, Commit* commit);  // Append commit to list
+void storeCommit(Commit* commit);  // Store commit in .delta/objects/commits
+void storeCommitTreeFile(Tree* tree);  // Store tree in .delta/objects/trees
+void commit(char commitMessage[COMMIT_MSG_SIZE]);  // Commit function to create and store commit
 
 #endif
