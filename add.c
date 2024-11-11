@@ -51,7 +51,7 @@ void addToStagingArea(const char* filename, const char hash[41]) {
 // Store the file content as a blob in .delta/objects using the hash as the filename
 void storeBlob(Blob* blob) {
     char path[60];
-    snprintf(path, sizeof(path), ".delta/objects/%s", blob->hash);
+    snprintf(path, sizeof(path), ".delta/objects/blobs/%s", blob->hash);
 
     if (access(path, F_OK) == 0) {
         return; // Blob already exists

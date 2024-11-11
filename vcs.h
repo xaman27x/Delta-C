@@ -39,12 +39,4 @@ void addToStagingArea(const char* filename, const char hash[41]);  // Add file t
 Blob* createBlob(const char* filename);  // Create a blob from file
 void freeBlob(Blob* blob);  // Free memory used by a blob
 
-// Commit functions and helpers
-void saveToFile(const char* path, const char* content);
-Tree* findOrCreateSubtree(Tree* root, const char* path);  // Find or create a subtree in the tree
-void addBlobToTree(Tree* tree, const char* hash, const char* filename);  // Add blob to the tree
-Tree* buildTreeFromIndex();  // Build tree based on the index file (staging area)
-Commit* createCommit(Tree* rootTree, Commit* parentCommit, const char* message);  // Create commit object
-void commit(const char* message, Commit* parentCommit);  // Commit changes
-
 #endif

@@ -5,9 +5,9 @@
 
 void initRepository() {
     if (mkdir(".delta") == 0) {
-        mkdir(".delta/objects");      // Store blobs and trees
-        mkdir(".delta/trees");        // Store tree objects
-        mkdir(".delta/commits");      // Store commit objects
+        mkdir(".delta/objects/trees");      // Store blobs and trees
+        mkdir(".delta/objects/blobs");        // Store tree objects
+        mkdir(".delta/objects/commits");      // Store commit objects
         mkdir(".delta/refs");         // Store branch references
         mkdir(".delta/refs/heads");   // Store individual branches
         
