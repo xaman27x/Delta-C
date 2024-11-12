@@ -1,18 +1,8 @@
 #include "vcs.h"
 #include <string.h>
 #include <stdio.h>
-#define SHA_BLOCK_SIZE 20 
+#include <stdint.h>
 
-typedef struct {
-    uint32_t state[5];
-    uint32_t count[2];
-    uint8_t buffer[64];
-} SHAContext;
-
-void SHATransform(uint32_t state[5], const uint8_t buffer[64]);
-void SHAInit(SHAContext* context);
-void SHAUpdate(SHAContext* context, const uint8_t* data, uint32_t len);
-void SHAFinal(uint8_t digest[SHA_BLOCK_SIZE], SHAContext* context);
 
 #define ROTLEFT(a, b) ((a << b) | (a >> (32 - b)))
 #define F0(b, c, d) ((b & c) | (~b & d))
