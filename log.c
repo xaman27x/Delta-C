@@ -13,6 +13,6 @@ void log(commitList* commitList) {
         char buffer[80]; 
         strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", &curr_commit->timestamp);
         printf("commit: \n\n", curr_commit->timestamp);
-        curr_commit = curr_commit->next;
+        curr_commit = curr_commit->parent;
     }
 }

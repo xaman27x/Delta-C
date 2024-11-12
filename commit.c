@@ -102,7 +102,7 @@ int isFileStaged(const char* filename, char staged_files[][100], int count) {
     return 0;
 }
 
-Tree* createCommitTree(const char* dirPath, char staged_files[][100], int staged_count) {
+Tree* createCommitTreeRecursive(const char* dirPath, char staged_files[][100], int staged_count) {
     Tree* tree = NULL;
     initTree(&tree);
     strncpy(tree->path, dirPath, sizeof(tree->path) - 1);
@@ -163,7 +163,7 @@ Tree* createCommitTree(const char* rootDir) {
         return NULL;
     }
 
-    return createCommitTree(rootDir, staged_files, staged_count);
+    return createCommitTreeRecursive(rootDir, staged_files, staged_count);
 }
 
 void hashCommit(Commit* commit, char hash[41]) {

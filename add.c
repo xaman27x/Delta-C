@@ -96,7 +96,7 @@ void updateStagingArea(const char* filename, const char hash[41]) {
 
 // Store the file content as a blob in .delta/objects
 void storeBlob(Blob* blob) {
-    char path[60];
+    char path[256];
     snprintf(path, sizeof(path), ".delta/objects/blobs/%s", blob->hash);
 
     if (access(path, F_OK) == 0) {
