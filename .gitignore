@@ -1,4 +1,7 @@
 .delta
 .dist
 .vscode
-./testfile.txt
+procedure.txt
+test.exe
+testfile.txt
+./testfolder
