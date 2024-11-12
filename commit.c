@@ -189,7 +189,6 @@ Commit* createCommit(char* commitMessage, Tree* tree, time_t timestamp) {
     commit->tree = tree;
     commit->timestamp = timestamp;
     commit->parent = NULL;
-    commit->secondParent = NULL;
     hashCommit(commit, commit->hash);
     return commit;
 }
@@ -216,9 +215,6 @@ void storeCommit(const Commit* commit) {
 
     if (commit->parent) {
         fprintf(commitFile, "%s\n", commit->parent->hash);
-    }
-    if (commit->secondParent) {
-        fprintf(commitFile, "%s\n", commit->secondParent->hash);
     }
 
     fclose(commitFile);
@@ -264,10 +260,10 @@ void appendCommitList(commitList* commits, Commit* commit) {
         *commits = commit;
     } else {
         Commit* current = *commits;
-        while (current->next) {
-            current = current->next;
+        while (current->parent) {
+            current = current->parent;
         }
-        current->next = commit;
+        current->parent = commit;
     }
 }
 

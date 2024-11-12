@@ -10,9 +10,11 @@
 #include <dirent.h>
 #include <time.h>
 #include <stdint.h> 
+#include <windows.h>
 
 #define COMMIT_MSG_SIZE 256
 #define SHA_BLOCK_SIZE 20 
+
 #define INDEX_FILE ".delta/index"
 #define BLOB_DIR ".delta/objects/blobs"
 #define COMMIT_DIR ".delta/objects/commits"
@@ -46,8 +48,6 @@ typedef struct Commit {
     time_t timestamp;            // Commit timestamp as time_t
     Tree* tree;                  // Pointer to the root tree snapshot
     struct Commit* parent;       // Pointer to the parent commit
-    struct Commit* secondParent; // For branching
-    struct Commit* next;
 } Commit;
 
 // Definition of SHAContext
