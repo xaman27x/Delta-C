@@ -1,8 +1,7 @@
 .delta
 .dist
 .vscode
-commit.c
-testfile.txt
-testfolder
-testfolder/1.txt
+procedure.txt
 test.exe
+testfile.txt
+./testfolder

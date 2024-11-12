@@ -18,7 +18,11 @@ void addFile(const char *filename) {
 }
 
 int main() {
+    Commit* commitList = NULL;
     initRepository();
     addFile("testfile.txt");
-    return 0;
+    addFile("testfolder/1.txt");
+    status();
+    commit("Hi", commitList);
+    return 0; 
 }

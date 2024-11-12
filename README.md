@@ -16,8 +16,8 @@ Delta VCS is a lightweight version control system built in C, designed to manage
 
 1. **Clone the Repository**
    ```bash
-   git clone https://github.com/yourusername/delta-vcs.git
-   cd delta-vcs
+   git clone https://github.com/xaman27x/delta-c.git
+   ```
 Compile the Source Code Use a C compiler (like gcc) to compile the code:
 
 
