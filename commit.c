@@ -8,7 +8,7 @@
 #include "vcs.h"
 
 typedef struct DirStack {
-    char path[512];  // Directory path
+    char path[512];
     struct DirStack* next;
 } DirStack;
 
@@ -71,16 +71,13 @@ void hashTree(Tree* tree, char hash[41]) {
     free(combinedData); 
 }
 
-// Helper function to check if a file or directory should be excluded
 int shouldExclude(const char *filename) {
-    // Exclude particular files
     if (strstr(filename, ".git") != NULL || strstr(filename, ".sample") != NULL || strstr(filename, DELTA_DIR) != NULL || strstr(filename, ".dist") || strstr(filename, VS_EXT)) {
         return 1;
     }
     return 0;
 }
 
-// Helper function to load staged files from index file
 int loadStagedFiles(char staged_files[][100], char hashes[][41], int *count) {
     FILE* indexFile = fopen(".delta/index", "r");
     if (!indexFile) {
@@ -96,7 +93,6 @@ int loadStagedFiles(char staged_files[][100], char hashes[][41], int *count) {
     return 0;
 }
 
-// Helper function to check if a filename is staged
 int isFileStaged(const char* filename, char staged_files[][100], int count) {
     for (int i = 0; i < count; i++) {
         if (strcmp(filename, staged_files[i]) == 0) {
@@ -109,7 +105,7 @@ int isFileStaged(const char* filename, char staged_files[][100], int count) {
 Tree* createCommitTree(const char* dirPath, char staged_files[][100], int staged_count) {
     Tree* tree = NULL;
     initTree(&tree);
-    strncpy(tree->path, dirPath, sizeof(tree->path) - 1);  // Set tree path for the directory
+    strncpy(tree->path, dirPath, sizeof(tree->path) - 1);
 
     DIR* dir = opendir(dirPath);
     if (!dir) {
@@ -132,15 +128,13 @@ Tree* createCommitTree(const char* dirPath, char staged_files[][100], int staged
         }
 
         if (S_ISDIR(fileStat.st_mode)) {
-            // If it's a directory, recursively create a subtree
             Tree* subtree = createCommitTree(fullPath, staged_files, staged_count);
             if (subtree) {
-                hashTree(subtree, subtree->hash);  // Hash each subtree
+                hashTree(subtree, subtree->hash);
                 subtree->next = tree->subtrees;
-                tree->subtrees = subtree;  // Link subtree to parent tree
+                tree->subtrees = subtree;
             }
         } else if (S_ISREG(fileStat.st_mode)) {
-            // If it's a file, process it as a blob if it is staged
             if (isFileStaged(entry->d_name, staged_files, staged_count)) {
                 Blob* newBlob = createBlob(entry->d_name);
                 if (!newBlob) {
@@ -154,7 +148,6 @@ Tree* createCommitTree(const char* dirPath, char staged_files[][100], int staged
         }
     }
     closedir(dir);
-
 
     hashTree(tree, tree->hash);
     return tree;
@@ -172,7 +165,6 @@ Tree* createCommitTree(const char* rootDir) {
 
     return createCommitTree(rootDir, staged_files, staged_count);
 }
-
 
 void hashCommit(Commit* commit, char hash[41]) {
     char combinedData[1024];
@@ -206,7 +198,7 @@ void storeCommit(const Commit* commit) {
     snprintf(path, sizeof(path), ".delta/objects/commits/%s", commit->hash);
 
     if (access(path, F_OK) == 0) {
-        return;  // Commit exists
+        return;
     }
 
     FILE* commitFile = fopen(path, "wb");
@@ -231,7 +223,6 @@ void storeCommit(const Commit* commit) {
     fclose(commitFile);
 }
 
-// format: <blob>: filename hash
 void storeCommitTreeFile(const Tree* tree) {
     char path[60];
     snprintf(path, sizeof(path), ".delta/objects/trees/%s", tree->hash);
@@ -279,17 +270,19 @@ void appendCommitList(commitList* commits, Commit* commit) {
 }
 
 // Main commit function 
-void commit(char commitMessage[COMMIT_MSG_SIZE], Commit* commitList) {
-
+void commit(char commitMessage[COMMIT_MSG_SIZE], commitList* commitList) {
     time_t currentTime = time(NULL);
     Tree* tree = createCommitTree(".");
+    
+    if (!tree) {
+        printf("Failed to create commit tree.\n");
+        return;
+    }
 
     Commit* newCommit = createCommit(commitMessage, tree, currentTime);
 
     storeCommit(newCommit);
     storeCommitTreeFile(tree);
 
-    initCommitList(&commitList);
-    appendCommitList(&commitList, newCommit);
-    return;
+    appendCommitList(commitList, newCommit);
 }
