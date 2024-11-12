@@ -24,5 +24,6 @@ int main() {
     addFile("testfolder/1.txt");
     status();
     commit("Hi", commitList);
+    commitLog(&commitList);
     return 0; 
 }

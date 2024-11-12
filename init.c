@@ -1,6 +1,3 @@
-#include <stdio.h>
-#include <sys/stat.h>
-#include <unistd.h>
 #include "vcs.h"
 
 void initRepository() {
