@@ -50,7 +50,7 @@ void traverseCommitTree(const char* dirPath, Tree* tree) {
     DIR* dir = opendir(dirPath);
     if (!dir) {
         perror("Failed to open directory");
-        return NULL;
+        return;
     }
 
     const Blob* curr_blob = tree->blobs;
@@ -88,7 +88,7 @@ void traverseCommitTree(const char* dirPath, Tree* tree) {
         fwrite(buffer, 1, fileSize, file);
         free(buffer); 
 
-        curr_blob = curr_blob->parent;
+        curr_blob = curr_blob->next;
     }
 
     const Tree* curr_subtree = tree->subtrees;
