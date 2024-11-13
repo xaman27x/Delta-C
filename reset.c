@@ -44,22 +44,16 @@ void traverseCommitTree(const char* dirPath, const Tree* tree) {
 
     // Ensure the target directory exists
     DIR* dir = opendir(dirPath);
+
     if (!dir) {
-        if (mkdir(dirPath) != 0) {
-            perror("Failed to create directory");
-            return;
-        }
-        dir = opendir(dirPath);
-        if (!dir) {
-            perror("Failed to open directory");
-            return;
-        }
+        perror("Failed to open directory");
+        return;
     }
 
     const Blob* curr_blob = tree->blobs;
     while (curr_blob) {
         char path[256];
-        snprintf(path, sizeof(path), "%s/%s", dirPath, curr_blob->filename);
+        snprintf(path, sizeof(path), "%s",  curr_blob->filename);
 
         FILE* file = fopen(path, "w");
         if (!file) {
