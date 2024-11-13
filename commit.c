@@ -258,12 +258,10 @@ void initCommitList(commitList* commits) {
 void appendCommitList(commitList* commits, Commit* commit) {
     if (*commits == NULL) {
         *commits = commit;
-    } else {
-        Commit* current = *commits;
-        while (current->parent) {
-            current = current->parent;
-        }
-        current->parent = commit;
+    } 
+    else {
+        commit->parent = *commits;
+        *commits = commit;
     }
 }
 

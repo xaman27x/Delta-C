@@ -24,6 +24,109 @@ void addFile(const char *filename) {
     }
 }
 
+
+void rebuildTreeFromFile(const char* treeHash, Tree** tree) {
+    char path[60];
+    snprintf(path, sizeof(path), ".delta/objects/trees/%s", treeHash);
+
+    FILE* treeFile = fopen(path, "r");
+    if (!treeFile) {
+        perror("Failed to open tree file");
+        return;
+    }
+
+    *tree = (Tree*)calloc(1, sizeof(Tree));
+    if (!*tree) {
+        perror("Failed to allocate memory for Tree");
+        fclose(treeFile);
+        return;
+    }
+
+    strncpy((*tree)->hash, treeHash, sizeof((*tree)->hash) - 1);
+
+    char line[512];
+    while (fgets(line, sizeof(line), treeFile)) {
+        if (strncmp(line, "<blob>:", 7) == 0) {
+            Blob* newBlob = (Blob*)calloc(1, sizeof(Blob));
+            if (!newBlob) {
+                perror("Failed to allocate memory for Blob");
+                fclose(treeFile);
+                return;
+            }
+            sscanf(line + 7, "%s %s", newBlob->filename, newBlob->hash);
+            newBlob->next = (*tree)->blobs;
+            (*tree)->blobs = newBlob;
+        } 
+        else if (strncmp(line, "<tree>:", 7) == 0) {
+            char subtreePath[100], subtreeHash[41];
+            sscanf(line + 7, "%s %s", subtreePath, subtreeHash);
+
+            Tree* subtree = NULL;
+            rebuildTreeFromFile(subtreeHash, &subtree);
+
+            if (subtree) {
+                strncpy(subtree->path, subtreePath, sizeof(subtree->path) - 1);
+                subtree->next = (*tree)->subtrees;
+                (*tree)->subtrees = subtree;
+            }
+        }
+    }
+
+    fclose(treeFile);
+}
+
+void rebuildCommitFromFile(const char* commitHash, Commit** commit) {
+    char path[60];
+    snprintf(path, sizeof(path), ".delta/objects/commits/%s", commitHash);
+
+    FILE* commitFile = fopen(path, "r");
+    if (!commitFile) {
+        perror("Failed to open commit file");
+        return;
+    }
+
+    *commit = (Commit*)calloc(1, sizeof(Commit));
+    if (!*commit) {
+        perror("Failed to allocate memory for Commit");
+        fclose(commitFile);
+        return;
+    }
+
+    char treeHash[41];
+    long timestamp;
+
+    fscanf(commitFile, "%s\n", (*commit)->hash);
+    fscanf(commitFile, "%s\n", (*commit)->message);
+    fscanf(commitFile, "%s\n%ld\n", treeHash, &timestamp);
+    (*commit)->timestamp = (time_t)timestamp;
+    (*commit)->parent = NULL;  
+    rebuildTreeFromFile(treeHash, &(*commit)->tree);
+
+    fclose(commitFile);
+}
+
+void rebuildCommitList(commitList* commits) {
+    DIR* commitDir = opendir(".delta/objects/commits");
+    if (!commitDir) {
+        perror("Failed to open commit directory");
+        return;
+    }
+
+    struct dirent* entry;
+    while ((entry = readdir(commitDir)) != NULL) {
+        if (entry->d_name[0] == '.') continue; 
+
+        Commit* newCommit = NULL;
+        rebuildCommitFromFile(entry->d_name, &newCommit);
+
+        if (newCommit) {
+            appendCommitList(commits, newCommit);
+        }
+    }
+
+    closedir(commitDir);
+}
+
 int main() {
     Commit* commitList = NULL;
     char inputLine[256];
