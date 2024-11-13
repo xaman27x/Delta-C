@@ -182,6 +182,12 @@ int main() {
         } else if (strcmp(command, "log") == 0) {
             commitLog(&commitList);
 
+        } else if (strcmp(command, "reset") == 0) {
+            int commitNumber;
+            printf("Enter the commit number as (-x): ");
+            scanf("%d", &commitNumber);
+            reset(commitNumber, &commitList);
+            
         } else {
             printf("Invalid Keyword!\n");
         }

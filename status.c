@@ -37,7 +37,7 @@ void status() {
 
                 // Calculate the hash of the current file
                 calculateFileHash(filename, runtime_hash);
-                printf("DEBUG: Working directory file: %s, Runtime Hash: %s\n", filename, runtime_hash);  // Debugging output
+                printf("Working directory file: %s, Runtime Hash: %s\n", filename, runtime_hash);  // Debugging output
 
                 int is_tracked = 0;
                 int is_modified = 0;
@@ -55,8 +55,6 @@ void status() {
 
                 if (is_tracked) {
                     if (is_modified) {
-                        printf(RED "Modified: %s\n" RESET, filename);
-                    } else {
                         printf(GREEN "Tracked: %s\n" RESET, filename);
                     }
                 } else {

@@ -1,9 +1,4 @@
 #include "vcs.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <dirent.h>
-#include <errno.h>
 
 Tree* findCommitTree(int x, commitList* commitList) {
     Commit* curr_commit = *commitList;

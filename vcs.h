@@ -14,6 +14,8 @@
 
 #define COMMIT_MSG_SIZE 256
 #define SHA_BLOCK_SIZE 20 
+#define FILENAME_SIZE 100
+#define PATH_SIZE 256
 
 #define INDEX_FILE ".delta/index"
 #define BLOB_DIR ".delta/objects/blobs"
@@ -25,18 +27,18 @@
 #define RED "\033[1;31m"
 #define RESET "\033[0m"
 
-typedef char Hash[41];  
+typedef char Hash[40];  
 
 // Structure definitions
 typedef struct Blob {
     Hash hash;                   // SHA-1 hash of the file content
-    char filename[100];          // Filename
+    char filename[FILENAME_SIZE];          // Filename
     struct Blob* next;           // Pointer to the next blob (for linked list)
 } Blob;
 
 typedef struct Tree {
     Hash hash;                   // SHA-1 hash of the directory structure
-    char path[256];              // Path of the directory (used for subtree identification)
+    char path[PATH_SIZE];              // Path of the directory (used for subtree identification)
     Blob* blobs;                 // List of blobs (files) in this directory
     struct Tree* subtrees;       // List of subtrees (subdirectories)
     struct Tree* next;           // Pointer to next directory in the list
@@ -44,21 +46,13 @@ typedef struct Tree {
 
 typedef struct Commit {
     Hash hash;                   // Hash of the commit
-    char message[256];           // Commit message
+    char message[COMMIT_MSG_SIZE];           // Commit message
     time_t timestamp;            // Commit timestamp as time_t
     Tree* tree;                  // Pointer to the root tree snapshot
     struct Commit* parent;       // Pointer to the parent commit
 } Commit;
 
-// Definition of SHAContext
-typedef struct {
-    uint32_t state[5];
-    uint32_t count[2];
-    uint8_t buffer[64];
-} SHAContext;
-
 // Function declarations
-
 // Init function
 void initRepository(); 
 
@@ -93,5 +87,7 @@ void status();
 // Log metrics
 void commitLog(commitList* commitList);
 
+// Reset Function
+void reset(int x, commitList* commitList);
 
 #endif
