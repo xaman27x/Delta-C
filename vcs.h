@@ -93,10 +93,5 @@ void status();
 // Log metrics
 void commitLog(commitList* commitList);
 
-// SHA function definitions
-void SHATransform(uint32_t state[5], const uint8_t buffer[64]);
-void SHAInit(SHAContext* context);
-void SHAUpdate(SHAContext* context, const uint8_t* data, uint32_t len);
-void SHAFinal(uint8_t digest[SHA_BLOCK_SIZE], SHAContext* context);
 
 #endif

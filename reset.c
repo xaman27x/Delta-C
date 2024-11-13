@@ -44,30 +44,43 @@ void deleteDirectoryContents(const char* dirPath) {
 }
 
 
+void traverseCommitTree(const char* dirPath, const Tree* tree) {
+    if (!tree) return;  // Ensure the tree is valid before traversing
 
-void traverseCommitTree(const char* dirPath, Tree* tree) {
-
+    // Ensure the target directory exists
     DIR* dir = opendir(dirPath);
     if (!dir) {
-        perror("Failed to open directory");
-        return;
+        if (mkdir(dirPath) != 0) {
+            perror("Failed to create directory");
+            return;
+        }
+        dir = opendir(dirPath);
+        if (!dir) {
+            perror("Failed to open directory");
+            return;
+        }
     }
 
     const Blob* curr_blob = tree->blobs;
     while (curr_blob) {
         char path[256];
         snprintf(path, sizeof(path), "%s/%s", dirPath, curr_blob->filename);
+
         FILE* file = fopen(path, "w");
         if (!file) {
-            perror("Failed to open file");
+            perror("Failed to open file for writing");
+            closedir(dir);
             return;
         }
 
-        char filepath[256];
-        snprintf(filepath, sizeof(filepath), ".delta/objects/blobs/%s", curr_blob->hash);
-        FILE* blobFile = fopen(filepath, "w");
+        char blobPath[256];
+        snprintf(blobPath, sizeof(blobPath), ".delta/objects/blobs/%s", curr_blob->hash);
+
+        FILE* blobFile = fopen(blobPath, "r");
         if (!blobFile) {
-            perror("Failed to open file");
+            perror("Failed to open blob file");
+            fclose(file);
+            closedir(dir);
             return;
         }
 
@@ -86,7 +99,9 @@ void traverseCommitTree(const char* dirPath, Tree* tree) {
 
         fread(buffer, 1, fileSize, blobFile);
         fwrite(buffer, 1, fileSize, file);
-        free(buffer); 
+        free(buffer);
+        fclose(file);
+        fclose(blobFile);
 
         curr_blob = curr_blob->next;
     }
@@ -99,6 +114,7 @@ void traverseCommitTree(const char* dirPath, Tree* tree) {
 
     closedir(dir);
 }
+
 
 void reset(int x, commitList* commitList) {
     if(!commitList) {
