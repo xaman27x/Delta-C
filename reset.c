@@ -96,6 +96,9 @@ void traverseCommitTree(const char* dirPath, Tree* tree) {
 }
 
 void reset(int x, commitList* commitList) {
+    if(!commitList) {
+        return;
+    }
     deleteDirectoryContents(".");
     Tree* tree = findCommitTree(x, commitList);
     traverseCommitTree(".", tree);
