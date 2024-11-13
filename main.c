@@ -24,6 +24,67 @@ void addFile(const char *filename) {
     }
 }
 
+// Load the commit list from stored commit files
+void loadCommitHistory(commitList* commits) {
+    DIR* dir = opendir(".delta/objects/commits");
+    if (!dir) {
+        perror("Failed to open commits directory");
+        return;
+    }
+
+    struct dirent* entry;
+    while ((entry = readdir(dir)) != NULL) {
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) continue;
+
+        // Read commit file
+        char commitPath[256];
+        snprintf(commitPath, sizeof(commitPath), ".delta/objects/commits/%s", entry->d_name);
+        FILE* commitFile = fopen(commitPath, "r");
+        if (!commitFile) {
+            perror("Failed to open commit file");
+            continue;
+        }
+
+        Commit* commit = (Commit*)calloc(1, sizeof(Commit));
+        if (!commit) {
+            perror("Failed to allocate memory for Commit");
+            fclose(commitFile);
+            continue;
+        }
+
+        fscanf(commitFile, "%40s\n", commit->hash);  // Commit hash
+        fgets(commit->message, sizeof(commit->message), commitFile);  // Commit message
+        commit->message[strcspn(commit->message, "\n")] = '\0';  // Remove newline
+        fscanf(commitFile, "%40s\n", commit->tree->hash);  // Root tree hash
+        fscanf(commitFile, "%ld\n", &commit->timestamp);  // Timestamp
+
+        // Load parent commit hash (if exists)
+        char parentHash[41];
+        if (fscanf(commitFile, "%40s\n", parentHash) > 0) {
+            Commit* parentCommit = findCommitByHash(parentHash, *commits);  // Find parent commit by hash
+            commit->parent = parentCommit;
+        }
+
+        fclose(commitFile);
+
+        // Append to commit list
+        appendCommitList(commits, commit);
+    }
+
+    closedir(dir);
+}
+Commit* findCommitByHash(const char* hash, commitList commits) {
+    Commit* current = commits;
+    while (current) {
+        if (strcmp(current->hash, hash) == 0) {
+            return current;
+        }
+        current = current->parent;
+    }
+    return NULL;
+}
+
+
 int main() {
     Commit* commitList = NULL;
     char inputLine[256];
@@ -63,6 +124,7 @@ int main() {
             free(files);
 
         } else if (strcmp(command, "commit") == 0) {
+            loadCommitHistory(&commitList);
             char *commitMessage = (char *)malloc(MAX_MESSAGE_LENGTH * sizeof(char));
             if (!commitMessage) continue;
 

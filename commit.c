@@ -268,9 +268,9 @@ void appendCommitList(commitList* commits, Commit* commit) {
 }
 
 // Main commit function 
-void commit(char commitMessage[COMMIT_MSG_SIZE], Commit* commitList) {
-
+void commit(char commitMessage[COMMIT_MSG_SIZE], commitList* commitList) {
     time_t currentTime = time(NULL);
+
     Tree* tree = createCommitTree(".");
 
     Commit* newCommit = createCommit(commitMessage, tree, currentTime);
@@ -278,7 +278,6 @@ void commit(char commitMessage[COMMIT_MSG_SIZE], Commit* commitList) {
     storeCommit(newCommit);
     storeCommitTreeFile(tree);
 
-    initCommitList(&commitList);
-    appendCommitList(&commitList, newCommit);
-    return;
+    appendCommitList(commitList, newCommit);
 }
+
