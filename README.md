@@ -3,10 +3,10 @@
     <img width="150" height="150" src="assets/source_control.png" alt="Delta VCS Logo">
   </a>
 </p>
-<h1 align="center">Delta-C - A Simple Version Control System</h1>
+<h1 align="center">Delta-C</h1>
 <div align="center">
   <a href="https://github.com/xaman27x/delta-c/blob/main/LICENSE" rel="noopener" target="_blank">
-    <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT">
+    <img src="https://img.shields.io/badge/license-GPU-blue.svg" alt="License: MIT">
   </a>
 
   <a href="https://github.com/xaman27x/delta-c/commits/main" rel="noopener" target="_blank">
