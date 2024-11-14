@@ -1,6 +1,6 @@
 # Delta VCS - A Simple Version Control System
 
-![Delta VCS Logo](path/to/logo.png)  <!-- Replace with the actual path to your logo image -->
+![Delta VCS Logo](assets/source_control.png)  <!-- Replace with the actual path to your logo image -->
 
 ## Description
 Delta VCS is a lightweight version control system built in C, designed to manage file versions in a simplified way. Inspired by Git, Delta VCS enables you to track file changes, commit snapshots, and revert to previous versions, making it perfect for small projects or educational purposes.
