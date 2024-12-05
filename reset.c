@@ -42,7 +42,11 @@ void deleteDirectoryContents(const char* dirPath) {
 void traverseCommitTree(const char* dirPath, const Tree* tree) {
     if (!tree) return;  // Ensure the tree is valid before traversing
 
-    // Ensure the target directory exists
+     if (mkdir(dirPath) == -1) {
+        perror("Failed to create directory");
+        return;
+    }
+
     DIR* dir = opendir(dirPath);
 
     if (!dir) {
@@ -111,5 +115,9 @@ void reset(int x, commitList* commitList) {
     }
     deleteDirectoryContents(".");
     Tree* tree = findCommitTree(x, commitList);
-    traverseCommitTree(".", tree);
+    Tree* p = tree->subtrees;
+    while (p) {
+        traverseCommitTree( p->subtrees->path, tree);
+    }
+  
 }

@@ -185,11 +185,11 @@ Commit* createCommit(char* commitMessage, Tree* tree, time_t timestamp) {
         exit(EXIT_FAILURE);
     }
 
-    strncpy(commit->message, commitMessage, sizeof(commit->message) - 1);
     commit->tree = tree;
     commit->timestamp = timestamp;
     commit->parent = NULL;
     hashCommit(commit, commit->hash);
+    strncpy(commit->message, commitMessage, sizeof(commit->message) - 1);
     return commit;
 }
 
@@ -206,6 +206,8 @@ void storeCommit(const Commit* commit) {
         perror("Failed to open commit file");
         return;
     }
+
+
 
     fprintf(commitFile, "%s\n%s\n%s\n%ld\n",
             commit->hash,
@@ -272,7 +274,6 @@ void commit(char commitMessage[COMMIT_MSG_SIZE], Commit* commitList) {
     Tree* tree = createCommitTree(".");
 
     Commit* newCommit = createCommit(commitMessage, tree, currentTime);
-
     storeCommit(newCommit);
     storeCommitTreeFile(tree);
 

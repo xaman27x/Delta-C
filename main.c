@@ -28,6 +28,7 @@ void addFile(const char *filename) {
 void rebuildTreeFromFile(const char* treeHash, Tree** tree) {
     char path[60];
     snprintf(path, sizeof(path), ".delta/objects/trees/%s", treeHash);
+    printf("Attempting to open file at path: %s\n", path);
 
     FILE* treeFile = fopen(path, "r");
     if (!treeFile) {
@@ -129,6 +130,8 @@ void rebuildCommitList(commitList* commits) {
 
 int main() {
     Commit* commitList = NULL;
+    initCommitList(&commitList);
+    rebuildCommitList(&commitList);
     char inputLine[256];
     char entry[ENTRY_SIZE];
 
