@@ -16,14 +16,10 @@ void addFile(const char *filename) {
         char line[256];
         while (fgets(line, sizeof(line), indexFile)) {
             line[strcspn(line, "\n")] = '\0';
-            printf("Staged: %s\n", line);
         }
         fclose(indexFile);
-    } else {
-        printf("Failed to open index file\n");
     }
 }
-
 
 void rebuildTreeFromFile(const char* treeHash, Tree** tree) {
     char path[60];
@@ -59,14 +55,15 @@ void rebuildTreeFromFile(const char* treeHash, Tree** tree) {
         } 
         else if (strncmp(line, "<tree>:", 7) == 0) {
             char subtreePath[100], subtreeHash[41];
-            sscanf(line + 7, "%s %s", subtreePath, subtreeHash);
+
+            sscanf(line + 7, " %99s %40s", subtreePath, subtreeHash);
 
             Tree* subtree = NULL;
             rebuildTreeFromFile(subtreeHash, &subtree);
 
             if (subtree) {
-                strncpy(subtree->path, subtreePath, sizeof(subtree->path) - 1);
-                subtree->next = (*tree)->subtrees;
+                strncpy(subtree->path, subtreePath, sizeof(subtree->path) - 1);  // Ensure null-termination
+                subtree->next = (*tree)->subtrees;  // Link subtree to the parent tree
                 (*tree)->subtrees = subtree;
             }
         }
@@ -128,7 +125,10 @@ void rebuildCommitList(commitList* commits) {
 }
 
 int main() {
+    initRepository();
     Commit* commitList = NULL;
+    initCommitList(&commitList);
+    rebuildCommitList(&commitList);
     char inputLine[256];
     char entry[ENTRY_SIZE];
 

@@ -11,7 +11,7 @@ void initRepository() {
         
         FILE* headFile = fopen(".delta/HEAD", "w");
         if (headFile) {
-            fprintf(headFile, "ref: refs/heads/master\n");
+            fprintf(headFile, "NULL");
             fclose(headFile);
         } else {
             perror("Failed to initialize HEAD file");

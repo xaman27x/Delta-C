@@ -1,39 +1,52 @@
 #include "vcs.h"
 
-typedef struct DirStack {
-    char path[512];  // Directory path
-    struct DirStack* next;
-} DirStack;
-
-// Push a new directory path onto the stack
-void pushDirStack(DirStack** stack, const char* path) {
-    DirStack* newNode = (DirStack*)malloc(sizeof(DirStack));
-    if (!newNode) {
-        perror("Failed to allocate memory for DirStack");
-        exit(EXIT_FAILURE);
-    }
-    strncpy(newNode->path, path, sizeof(newNode->path) - 1);
-    newNode->next = *stack;
-    *stack = newNode;
-}
-
-// Pop a directory path from the stack
-int popDirStack(DirStack** stack, char* path) {
-    if (*stack == NULL) return 0;
-    DirStack* temp = *stack;
-    strncpy(path, temp->path, sizeof(temp->path) - 1);
-    *stack = temp->next;
-    free(temp);
-    return 1;
-}
-
-// Initialize a Tree structure
 void initTree(Tree** tree) {
-    *tree = (Tree*)calloc(1, sizeof(Tree));  // Use calloc for zeroed memory
+    *tree = (Tree*)calloc(1, sizeof(Tree));  
     if (*tree == NULL) {
         perror("Failed to allocate memory for Tree");
         exit(EXIT_FAILURE);
     }
+}
+
+Commit* loadCommit(const char* commitHash) {
+    char path[128];
+    snprintf(path, sizeof(path), "%s/%s", COMMIT_DIR, commitHash);
+
+    FILE* commitFile = fopen(path, "r");
+    if (commitFile == NULL) {
+        perror("Failed to open commit file");
+        return NULL;
+    }
+    Commit* commit = (Commit*)calloc(1, sizeof(Commit));
+    if (commit == NULL) {
+        perror("Failed to allocate memory for Commit");
+        fclose(commitFile);
+        return NULL;
+    }
+    char parentHash[41] = {0};
+    char treeHash[41];
+    long timestamp;
+
+    fscanf(commitFile, "%s\n", commit->hash);      // Commit hash
+    fscanf(commitFile, "%255[^\n]\n", commit->message);  // Commit message
+    fscanf(commitFile, "%s\n", treeHash);           // Tree hash
+    fscanf(commitFile, "%ld\n", &timestamp);        // Timestamp
+
+    commit->timestamp = (time_t)timestamp;          // Convert timestamp to time_t
+
+    if (fscanf(commitFile, "%40s\n", parentHash) == 1) {
+        Commit* parentCommit = loadCommit(parentHash); 
+        if (parentCommit) {
+            commit->parent = parentCommit;
+        }
+    }
+
+
+    rebuildTreeFromFile(treeHash, &commit->tree);
+
+    fclose(commitFile);  
+
+    return commit;
 }
 
 void hashTree(Tree* tree, char hash[41]) {
@@ -64,16 +77,14 @@ void hashTree(Tree* tree, char hash[41]) {
     free(combinedData); 
 }
 
-// Helper function to check if a file or directory should be excluded
 int shouldExclude(const char *filename) {
-    // Exclude particular files
-    if (strstr(filename, ".git") != NULL || strstr(filename, ".sample") != NULL || strstr(filename, DELTA_DIR) != NULL || strstr(filename, ".dist") || strstr(filename, VS_EXT)) {
+
+    if (strstr(filename, "delta.exe") || strstr(filename, ".git") != NULL || strstr(filename, ".sample") != NULL || strstr(filename, DELTA_DIR) != NULL || strstr(filename, ".dist") || strstr(filename, VS_EXT) || strstr(filename, ".vscode")) {
         return 1;
     }
     return 0;
 }
 
-// Helper function to load staged files from index file
 int loadStagedFiles(char staged_files[][100], char hashes[][41], int *count) {
     FILE* indexFile = fopen(".delta/index", "r");
     if (!indexFile) {
@@ -89,7 +100,7 @@ int loadStagedFiles(char staged_files[][100], char hashes[][41], int *count) {
     return 0;
 }
 
-// Helper function to check if a filename is staged
+
 int isFileStaged(const char* filename, char staged_files[][100], int count) {
     for (int i = 0; i < count; i++) {
         if (strcmp(filename, staged_files[i]) == 0) {
@@ -102,7 +113,7 @@ int isFileStaged(const char* filename, char staged_files[][100], int count) {
 Tree* createCommitTreeRecursive(const char* dirPath, char staged_files[][100], int staged_count) {
     Tree* tree = NULL;
     initTree(&tree);
-    strncpy(tree->path, dirPath, sizeof(tree->path) - 1);  // Set tree path for the directory
+    strncpy(tree->path, dirPath, sizeof(tree->path) - 1);
 
     DIR* dir = opendir(dirPath);
     if (!dir) {
@@ -125,15 +136,13 @@ Tree* createCommitTreeRecursive(const char* dirPath, char staged_files[][100], i
         }
 
         if (S_ISDIR(fileStat.st_mode)) {
-            // If it's a directory, recursively create a subtree
             Tree* subtree = createCommitTreeRecursive(fullPath, staged_files, staged_count);
             if (subtree) {
-                hashTree(subtree, subtree->hash);  // Hash each subtree
+                hashTree(subtree, subtree->hash);
                 subtree->next = tree->subtrees;
-                tree->subtrees = subtree;  // Link subtree to parent tree
+                tree->subtrees = subtree;
             }
         } else if (S_ISREG(fileStat.st_mode)) {
-            // If it's a file, process it as a blob if it is staged
             if (isFileStaged(entry->d_name, staged_files, staged_count)) {
                 Blob* newBlob = createBlob(entry->d_name);
                 if (!newBlob) {
@@ -179,17 +188,33 @@ void hashCommit(Commit* commit, char hash[41]) {
 }
 
 Commit* createCommit(char* commitMessage, Tree* tree, time_t timestamp) {
-    Commit* commit = (Commit*)calloc(1, sizeof(Commit)); 
+    Commit* commit = (Commit*)calloc(1, sizeof(Commit));
     if (!commit) {
         perror("Failed to allocate memory for Commit");
         exit(EXIT_FAILURE);
     }
 
-    strncpy(commit->message, commitMessage, sizeof(commit->message) - 1);
     commit->tree = tree;
     commit->timestamp = timestamp;
-    commit->parent = NULL;
+
+    FILE* headFile = fopen(".delta/HEAD", "r");
+    if (headFile) {
+        char parentHash[41];
+        if (fgets(parentHash, sizeof(parentHash), headFile)) {
+            parentHash[strcspn(parentHash, "\n")] = '\0'; 
+            Commit* parentCommit = loadCommit(parentHash);
+            if (parentCommit) {
+                commit->parent = parentCommit;
+            }
+        }
+        fclose(headFile);
+    } else {
+        commit->parent = NULL;
+    }
     hashCommit(commit, commit->hash);
+
+    strncpy(commit->message, commitMessage, sizeof(commit->message) - 1);
+
     return commit;
 }
 
@@ -198,7 +223,7 @@ void storeCommit(const Commit* commit) {
     snprintf(path, sizeof(path), ".delta/objects/commits/%s", commit->hash);
 
     if (access(path, F_OK) == 0) {
-        return;  // Commit exists
+        return; 
     }
 
     FILE* commitFile = fopen(path, "wb");
@@ -207,11 +232,7 @@ void storeCommit(const Commit* commit) {
         return;
     }
 
-    fprintf(commitFile, "%s\n%s\n%s\n%ld\n",
-            commit->hash,
-            commit->message,
-            commit->tree->hash,
-            (long)commit->timestamp);
+    fprintf(commitFile, "%s\n%s\n%s\n%ld\n", commit->hash, commit->message, commit->tree->hash, (long)commit->timestamp);
 
     if (commit->parent) {
         fprintf(commitFile, "%s\n", commit->parent->hash);
@@ -220,7 +241,7 @@ void storeCommit(const Commit* commit) {
     fclose(commitFile);
 }
 
-// format: <blob>: filename hash
+
 void storeCommitTreeFile(const Tree* tree) {
     char path[60];
     snprintf(path, sizeof(path), ".delta/objects/trees/%s", tree->hash);
@@ -265,18 +286,40 @@ void appendCommitList(commitList* commits, Commit* commit) {
     }
 }
 
-// Main commit function 
 void commit(char commitMessage[COMMIT_MSG_SIZE], Commit* commitList) {
-
     time_t currentTime = time(NULL);
+
     Tree* tree = createCommitTree(".");
+    if (!tree) {
+        printf("No changes to commit.\n");
+        return;
+    }
 
     Commit* newCommit = createCommit(commitMessage, tree, currentTime);
 
     storeCommit(newCommit);
     storeCommitTreeFile(tree);
 
+    FILE* headFile = fopen(".delta/HEAD", "w");
+    if (!headFile) {
+        perror("Failed to update HEAD file");
+        return;
+    }
+    fprintf(headFile, "%s\n", newCommit->hash);  // Store the new commit hash in HEAD
+    fclose(headFile);
+
+    FILE* indexFile = fopen(".delta/index", "w");
+    if (!indexFile) {
+        perror("Failed to clear the staging area (index file)");
+    } else {
+        fclose(indexFile);
+    }
+
     initCommitList(&commitList);
     appendCommitList(&commitList, newCommit);
-    return;
+
+    printf("Committed successfully. Hash: %s\n", newCommit->hash);
 }
+
+
+
